@@ -22,12 +22,26 @@ const initialFriends = [
 ];
 
 export default  function App() {
+  const [friends, setFriends] = useState(initialFriends);
+  const [showAddFriend, setShowAddFriend] = useState(false);
+
+  function handleShowAddFriend() {
+    setShowAddFriend((show) => !show);
+  }
+  function handleAddFriend(friend) {
+      setFriends((friends) => [...friends, friend]);
+      setShowAddFriend(false);
+  }
+
   return (
     <div className="app">
       <div className="sidebar">
-            <FriendsList />
-            <Button>Add friend</Button>
-            <FromAddFriend /> 
+            <FriendsList friends={friends} />
+            {showAddFriend && <FromAddFriend onAddFriend={handleAddFriend} /> }
+            <Button onClick={handleShowAddFriend}>
+              {showAddFriend ? "Close" : "Add friend"}
+            </Button>
+            
       </div>
       <FormSplitBill />
     </div>
@@ -43,18 +57,25 @@ function Button  ( {children, onClick} )  {
   )
 }
 
-function FromAddFriend () {
+function FromAddFriend ({ onAddFriend }) {
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
 
   function handleSubmit(e) {
       e.preventDefault();
+
+      if(!name || !image) return   ;
+      const id = crypto.randomUUID();
       const newFriend = {
-          name,
-          image,
-          balance: 0,
-          id: crypto.randomUUID()  
+        id,  
+        name,
+          image: `${image}?=${id}`,
+          balance: 0,  
       }
+      onAddFriend(newFriend);
+
+      setName("");
+      setImage("");
   }
 
 return (
@@ -69,9 +90,7 @@ return (
 )
 }
 
-function FriendsList() {
-  const friends = initialFriends;
-
+function FriendsList( {friends} ) {
   return(
     <ul>
           {
